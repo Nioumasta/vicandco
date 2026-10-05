@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Packshot Produit · Agnes</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg:#fafafa; --panel:#ffffff; --border:#e5e5e5;
+  --ink:#1a1a1a; --ink-dim:#777;
+  --success:#2d8a4e; --error:#c0392b; --warn:#d4a017; --info:#4a6cf7;
+  --radius:12px;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg); color: var(--ink); min-height: 100vh;
+  padding: 1.5rem 1rem 6rem; font-size: 15px; line-height: 1.5;
+  max-width: 800px; margin: 0 auto; }
+header { margin-bottom: 1.5rem; text-align: center; }
+h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.3rem; }
+.subtitle { font-size: 0.85rem; color: var(--ink-dim); }
+.section { background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 1rem; padding: 1.2rem; }
+.section-title { font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--ink-dim); font-weight: 700; margin-bottom: 1rem; }
+.api-key-input { width: 100%; padding: 0.85rem 1rem; border-radius: 8px;
+  border: 1px solid var(--border); background: #fafafa; color: var(--ink);
+  font-family: monospace; font-size: 0.85rem; margin-bottom: 0.6rem; }
+.btn { width: 100%; padding: 0.9rem; border-radius: 8px; border: none;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-bottom: 0.6rem; }
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+.upload-zone { border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 2rem 1rem; text-align: center; cursor: pointer; margin-bottom: 1rem;
+  position: relative; }
+.upload-zone.has-image { padding: 0; border-style: solid; border-color: var(--ink); }
+.upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-zone .icon { font-size: 2.2rem; opacity: 0.6; margin-bottom: 0.5rem; }
+.upload-zone .t1 { font-size: 0.95rem; font-weight: 600; }
+.upload-zone .t2 { font-size: 0.75rem; color: var(--ink-dim); margin-top: 0.3rem; }
+.preview-img { width: 100%; max-height: 400px; object-fit: contain; display: block; background: #000; }
+.preview-label { padding: 0.5rem 0.7rem; background: var(--panel);
+  font-size: 0.7rem; text-align: center; border-top: 1px solid var(--border); }
+.bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem; }
+.bg-card { padding: 0.7rem 0.8rem; border-radius: 8px; border: 1px solid var(--border);
+  background: #f5f5f5; cursor: pointer; text-align: center; transition: all 0.15s; }
+.bg-card.selected { background: var(--ink); color: #fff; border-color: var(--ink); }
+.bg-card .bg-emoji { font-size: 1.4rem; display: block; margin-bottom: 0.2rem; }
+.bg-card .bg-name { font-size: 0.72rem; font-weight: 600; }
+.control-row { margin-bottom: 0.9rem; }
+.control-label { display: block; font-size: 0.72rem; color: var(--ink-dim);
+  margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+select { width: 100%; padding: 0.7rem 0.9rem; border-radius: 8px;
+  border: 1px solid var(--border); background: #fafafa; color: var(--ink);
+  font-size: 0.88rem; -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%231a1a1a' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2rem; }
+.gallery { margin-top: 1.5rem; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.8rem; }
+.gallery-item { border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+  background: #000; animation: fadeIn 0.4s ease; }
+.gallery-item video { width: 100%; display: block; aspect-ratio: 9/16; object-fit: cover; }
+.gallery-item .caption { padding: 0.5rem 0.7rem; background: var(--panel);
+  font-size: 0.72rem; color: var(--ink-dim); text-align: center; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.status-bar { position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--ink); color: #fff; padding: 0.7rem 1rem;
+  font-size: 0.78rem; display: flex; align-items: center; gap: 0.6rem;
+  transform: translateY(100%); transition: transform 0.3s; z-index: 100; }
+.status-bar.visible { transform: translateY(0); }
+.spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast { position: fixed; top: 1.5rem; left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: var(--ink); color: #fff; padding: 0.85rem 1.4rem;
+  border-radius: 10px; font-size: 0.85rem; font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000; opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease; }
+.toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--error); }
+.toast.warn { background: var(--warn); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Packshot Produit</h1>
+  <p class="subtitle">Transformez une photo produit en vidéo publicitaire 9:16</p>
+</header>
+
+<div class="section">
+  <div class="section-title">🔑 Clé API Agnes</div>
+  <input type="password" class="api-key-input" id="api-key-input" placeholder="sk-...">
+  <button class="btn btn-primary" id="save-key-btn">Enregistrer la clé</button>
+</div>
+
+<div class="section">
+  <div class="section-title">📦 Photo du produit</div>
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" id="file-input" accept="image/*">
+    <div id="upload-content">
+      <div class="icon">📷</div>
+      <div class="t1">Cliquez pour ajouter votre photo produit</div>
+      <div class="t2">Photo détourée de préférence · fond neutre</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🎨 Fond & ambiance</div>
+  <div class="bg-grid" id="bg-grid"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">⚙️ Mouvement</div>
+  <div class="control-row">
+    <label class="control-label">Type de rotation</label>
+    <select id="rotation-select">
+      <option value="orbit">🔄 Orbite 360° douce</option>
+      <option value="zoom" selected>🔍 Zoom avant cinématique</option>
+      <option value="tilt">📐 Tilt lent (haut/bas)</option>
+      <option value="pulse">💫 Pulsation lumineuse</option>
+      <option value="reveal">✨ Révélation par la lumière</option>
+    </select>
+  </div>
+  <div class="control-row">
+    <label class="control-label">Intensité</label>
+    <select id="intensity-select">
+      <option value="subtle">Subtile — élégante</option>
+      <option value="moderate" selected>Modérée — premium</option>
+      <option value="strong">Forte — dynamique</option>
+    </select>
+  </div>
+  <div class="control-row">
+    <label class="control-label">Durée</label>
+    <select id="duration-select">
+      <option value="121">5 secondes</option>
+      <option value="153" selected>6,4 secondes (recommandé)</option>
+      <option value="241">10 secondes</option>
+    </select>
+  </div>
+</div>
+
+<button class="btn btn-primary" id="generate-btn" disabled>🚀 Générer la vidéo packshot</button>
+
+<div class="gallery" id="gallery" style="display:none;">
+  <div class="section-title">Vidéos générées</div>
+  <div class="gallery-grid" id="gallery-grid"></div>
+</div>
+
+<div class="status-bar" id="status-bar"><div class="spinner"></div><span id="status-text">Préparation…</span></div>
+<div class="toast" id="toast"><span id="toast-text">Message</span></div>
+
+<script>
+// CONFIG AGNES
+const API_BASE = 'https://apihub.agnes-ai.com/v1';
+const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
+const MODEL_VIDEO = 'agnes-video-v2.0';
+const FRAME_RATE = 24;
+const CREATE_INTERVAL_MIN = 62000;
+const POLL_INTERVAL_SEC = 8;
+const MAX_POLL_ATTEMPTS = 100;
+const TIMING_CACHE_KEY = 'agnes_packshot_timing';
+const API_KEY_STORAGE = 'agnes_api_key_packshot';
+
+// FONDS
+const BACKGROUNDS = [
+  { id:'studio-white', name:'Studio blanc', emoji:'⚪', prompt:'pure white studio background, seamless, high-key lighting, professional product photography' },
+  { id:'studio-black', name:'Studio noir', emoji:'⚫', prompt:'deep black studio background, dramatic rim lighting, luxury product photography' },
+  { id:'marble', name:'Marbre', emoji:'🏛️', prompt:'luxury white marble surface, soft natural light, elegant high-end product shot' },
+  { id:'wood', name:'Bois naturel', emoji:'🪵', prompt:'natural wooden surface, warm ambient light, rustic premium feel' },
+  { id:'silk', name:'Soie colorée', emoji:'🎀', prompt:'flowing silk fabric background, rich saturated colors, elegant fashion product shot' },
+  { id:'gradient', name:'Dégradé coloré', emoji:'🌈', prompt:'smooth pastel gradient background, modern minimal, trending e-commerce aesthetic' },
+  { id:'nature', name:'Nature', emoji:'🌿', prompt:'natural outdoor greenery background, soft bokeh, organic product photography' },
+  { id:'neon', name:'Néon urbain', emoji:'🌃', prompt:'neon-lit urban background, magenta and cyan glow, trendy night atmosphere' }
+];
+
+// STATE
+const state = {
+  image: null,
+  selectedBg: 'studio-white',
+  rotation: 'zoom',
+  intensity: 'moderate',
+  durationFrames: 153,
+  isRunning: false,
+  videoUrl: null
+};
+
+// UTILS
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let toastTimeout = null;
+function showToast(msg, type='success', dur=2500){
+  const t = $('toast');
+  t.classList.remove('visible','success','error','warn');
+  void t.offsetWidth;
+  $('toast-text').textContent = msg;
+  t.classList.add(type);
+  requestAnimationFrame(() => t.classList.add('visible'));
+  if(toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('visible'), dur);
+}
+function setStatus(t){
+  const bar = $('status-bar');
+  if(t){ bar.classList.add('visible'); $('status-text').textContent = t; }
+  else bar.classList.remove('visible');
+}
+
+// CLÉ API
+function getKey(){ try { return (localStorage.getItem(API_KEY_STORAGE) || '').trim(); } catch(e){ return ''; } }
+function saveKey(){
+  const v = $('api-key-input').value.trim();
+  if(!v){ localStorage.removeItem(API_KEY_STORAGE); showToast('Clé supprimée','warn'); return; }
+  localStorage.setItem(API_KEY_STORAGE, v);
+  showToast('Clé enregistrée ✓','success');
+  updateGenerateBtn();
+}
+
+// TIMING
+function estimateGenerationTime(){
+  try {
+    const c = JSON.parse(localStorage.getItem(TIMING_CACHE_KEY) || '{}');
+    const s = c[String(state.durationFrames)];
+    if(s && s.length) return s.reduce((a,b)=>a+b,0)/s.length;
+  } catch(e){}
+  return 30000 + state.durationFrames * 500;
+}
+function recordGenerationTime(ms){
+  try {
+    const c = JSON.parse(localStorage.getItem(TIMING_CACHE_KEY) || '{}');
+    const k = String(state.durationFrames);
+    if(!c[k]) c[k] = [];
+    c[k].push(ms);
+    if(c[k].length > 10) c[k] = c[k].slice(-10);
+    localStorage.setItem(TIMING_CACHE_KEY, JSON.stringify(c));
+  } catch(e){}
+}
+
+// FETCH RETRY
+async function apiFetch(url, options, label='API'){
+  for(let attempt = 0; attempt < 7; attempt++){
+    try {
+      const res = await fetch(url, options);
+      if(res.status === 429){ await sleep([15,30,45,60,90,120,180][Math.min(attempt,6)]*1000); continue; }
+      if(res.status === 503){ await sleep([5,10,15,20,30,45][Math.min(attempt,5)]*1000); continue; }
+      return res;
+    } catch(e){ await sleep([3,5,8,12,20,30][Math.min(attempt,5)]*1000); }
+  }
+  return fetch(url, options);
+}
+
+// IMAGE HANDLING
+function fileToDataUri(file){
+  return new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('Erreur'));
+    r.readAsDataURL(file);
+  });
+}
+async function handleFile(file){
+  if(!file || !file.type.startsWith('image/')) return;
+  const dataUri = await fileToDataUri(file);
+  state.image = dataUri;
+  renderPreview();
+  updateGenerateBtn();
+}
+function renderPreview(){
+  const zone = $('upload-zone');
+  const content = $('upload-content');
+  if(state.image){
+    zone.classList.add('has-image');
+    content.innerHTML = '<img src="'+state.image+'" class="preview-img"><div class="preview-label">✓ Photo produit prête</div>';
+  } else {
+    zone.classList.remove('has-image');
+    content.innerHTML = '<div class="icon">📷</div><div class="t1">Cliquez pour ajouter votre photo produit</div><div class="t2">Photo détourée de préférence</div>';
+  }
+}
+
+// PROMPT
+function buildPrompt(){
+  const bg = BACKGROUNDS.find(b => b.id === state.selectedBg) || BACKGROUNDS[0];
+  const rotMap = {
+    orbit: 'slow continuous orbit around the product, camera circling smoothly',
+    zoom: 'slow cinematic push-in, camera gliding forward elegantly',
+    tilt: 'slow vertical tilt revealing the full product from base to top',
+    pulse: 'pulsing soft light glowing rhythmically around the product',
+    reveal: 'dramatic light reveal, shadows parting to unveil the product'
+  };
+  const intMap = {
+    subtle: 'very subtle elegant movement',
+    moderate: 'moderate premium movement, balanced and controlled',
+    strong: 'dynamic energetic movement, punchy and eye-catching'
+  };
+  return [
+    'Animate this exact product photo as the starting frame.',
+    'The product must remain IDENTICAL: same shape, same colors, same branding, same identity. This is a CONTINUATION of the source image.',
+    'Background transformation: ' + bg.prompt + '.',
+    'Camera movement: ' + (rotMap[state.rotation] || rotMap.zoom) + '.',
+    'Movement intensity: ' + (intMap[state.intensity] || intMap.moderate) + '.',
+    'Professional e-commerce product video, glossy reflections on the product surface, cinematic lighting, high-end commercial feel.',
+    'Portrait 9:16 vertical, 24fps, no text, no subtitles, no watermarks, no logos overlay.'
+  ].join(' ');
+}
+
+// API VIDEO
+async function createVideoTask(imageDataUri, prompt, numFrames){
+  const body = {
+    model: MODEL_VIDEO,
+    prompt: prompt,
+    image: imageDataUri,
+    num_frames: numFrames,
+    frame_rate: FRAME_RATE
+  };
+  const res = await apiFetch(API_BASE + '/videos', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + getKey(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }, 'Création');
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const id = data.video_id || data.id || data.task_id;
+  if(!id) throw new Error('Pas de video_id');
+  return id;
+}
+async function pollVideo(videoId, onProgress){
+  const estSec = estimateGenerationTime() / 1000;
+  let remaining = Math.max(20, Math.floor(estSec * 0.8));
+  while(remaining > 0){
+    onProgress('Préparation… — ' + remaining + 's');
+    await sleep(1000); remaining--;
+  }
+  for(let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++){
+    if(attempt > 0){
+      let r = POLL_INTERVAL_SEC;
+      while(r > 0){ onProgress('En cours… — ' + r + 's'); await sleep(1000); r--; }
+    }
+    const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
+    const res = await apiFetch(url, { method:'GET', headers:{ 'Authorization': 'Bearer ' + getKey() } }, 'Polling');
+    const d = await res.json();
+    const status = d.status || 'unknown';
+    const progress = d.progress || 0;
+    onProgress('Création… ' + progress + '%');
+    if(status === 'completed' || status === 'succeeded' || status === 'done'){
+      const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url);
+      if(!videoUrl) throw new Error('Terminé sans URL');
+      return videoUrl;
+    }
+    if(status === 'failed' || status === 'error' || status === 'cancelled') throw new Error('Échec');
+  }
+  throw new Error('Timeout');
+}
+
+// PIPELINE
+async function generateVideo(){
+  if(state.isRunning || !state.image || !getKey()) return;
+  state.isRunning = true;
+  updateGenerateBtn();
+  $('gallery').style.display = 'none';
+  $('gallery-grid').innerHTML = '';
+  setStatus('Création de la vidéo packshot…');
+
+  try {
+    const prompt = buildPrompt();
+    console.log('Prompt:', prompt);
+    const videoId = await createVideoTask(state.image, prompt, state.durationFrames);
+    console.log('Video ID:', videoId);
+    const startTime = Date.now();
+    const url = await pollVideo(videoId, p => setStatus(p));
+    const elapsed = Date.now() - startTime;
+    recordGenerationTime(elapsed);
+    state.videoUrl = url;
+    displayVideo(url, elapsed);
+    showToast('Vidéo prête en ' + (elapsed/1000).toFixed(1) + 's !', 'success', 3500);
+    setStatus('✦ Terminé ✦');
+    await sleep(3000);
+  } catch(e){
+    showToast('Erreur : ' + e.message.slice(0,60), 'error');
+    setStatus('Erreur : ' + e.message.slice(0,40));
+    await sleep(4000);
+  }
+
+  setStatus(null);
+  state.isRunning = false;
+  updateGenerateBtn();
+}
+
+function displayVideo(url, elapsed){
+  $('gallery').style.display = 'block';
+  const item = document.createElement('div');
+  item.className = 'gallery-item';
+  item.innerHTML = '<video src="'+url+'" controls playsinline preload="metadata"></video>' +
+    '<div class="caption">Packshot généré en ' + (elapsed/1000).toFixed(1) + 's</div>';
+  $('gallery-grid').appendChild(item);
+}
+
+function updateGenerateBtn(){
+  const btn = $('generate-btn');
+  btn.disabled = !state.image || !getKey() || state.isRunning;
+  if(state.isRunning) btn.textContent = '⏳ Génération…';
+  else if(!state.image) btn.textContent = 'Ajoutez une photo produit';
+  else if(!getKey()) btn.textContent = 'Ajoutez votre clé API';
+  else btn.textContent = '🚀 Générer la vidéo packshot';
+}
+
+// UI FONDS
+function renderBackgrounds(){
+  const g = $('bg-grid');
+  g.innerHTML = BACKGROUNDS.map(b =>
+    '<div class="bg-card' + (state.selectedBg === b.id ? ' selected' : '') + '" data-bg="'+b.id+'">' +
+      '<div class="bg-emoji">'+b.emoji+'</div>' +
+      '<div class="bg-name">'+b.name+'</div>' +
+    '</div>'
+  ).join('');
+  g.querySelectorAll('[data-bg]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.selectedBg = el.dataset.bg;
+      renderBackgrounds();
+    });
+  });
+}
+
+// INIT
+(function init(){
+  renderBackgrounds();
+  renderPreview();
+  updateGenerateBtn();
+
+  $('save-key-btn').addEventListener('click', saveKey);
+  $('api-key-input').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); saveKey(); } });
+  $('file-input').addEventListener('change', e => {
+    handleFile(e.target.files[0]);
+    e.target.value = '';
+  });
+  $('rotation-select').addEventListener('change', e => { state.rotation = e.target.value; });
+  $('intensity-select').addEventListener('change', e => { state.intensity = e.target.value; });
+  $('duration-select').addEventListener('change', e => { state.durationFrames = parseInt(e.target.value, 10); });
+  $('generate-btn').addEventListener('click', generateVideo);
+
+  const saved = getKey();
+  if(saved) $('api-key-input').value = saved;
+})();
+</script>
+</body>
+</html>
